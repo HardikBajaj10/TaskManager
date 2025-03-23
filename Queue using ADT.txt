@@ -1,0 +1,150 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Task {
+public:
+    int id;
+    string task;
+    int daysLeft;
+    Task* next;
+
+    Task(int taskId, string taskName, int days) {
+        id = taskId;
+        task = taskName;
+        daysLeft = days;
+        next = nullptr;
+    }
+};
+
+class TaskManager {
+private:
+    Task* front;
+    Task* rear;
+
+public:
+    TaskManager() {
+        front = rear = nullptr;
+    }
+
+    // Enqueue operation
+    void enqueue(int id, const string& name, int daysLeft) {
+        Task* newTask = new Task(id, name, daysLeft);
+        if (!newTask) {
+            cout << "Memory allocation failed.\n";
+            return;
+        }
+
+        if (rear == nullptr) { // Queue is empty
+            front = rear = newTask;
+        } else {
+            rear->next = newTask;
+            rear = newTask;
+        }
+
+        cout << "Task enqueued successfully.\n";
+    }
+
+    // Dequeue operation
+    void dequeue() {
+        if (front == nullptr) {
+            cout << "Queue underflow! No tasks to dequeue.\n";
+            return;
+        }
+
+        Task* temp = front;
+        front = front->next;
+
+        if (front == nullptr) { 
+            rear = nullptr;
+        }
+
+        cout << "Dequeued task: " << temp->task << "\n";
+        delete temp;
+    }
+
+    // Peek operation
+    void peek() {
+        if (front == nullptr) {
+            cout << "Queue is empty!\n";
+            return;
+        }
+        cout << "Front task: " << front->task << " (ID: " << front->id << ", Days Left: " << front->daysLeft << ")\n";
+    }
+
+    // Search operation
+    bool search(int id) {
+        Task* current = front;
+        while (current) {
+            if (current->id == id) {
+                cout << "Task found: " << current->task << " (ID: " << id << ")\n";
+                return true;
+            }
+            current = current->next;
+        }
+        cout << "Task with ID " << id << " not found.\n";
+        return false;
+    }
+
+
+    void display() {
+        if (front == nullptr) {
+            cout << "Queue is empty!\n";
+            return;
+        }
+
+        cout << "Task Queue:\n";
+        Task* current = front;
+        while (current) {
+            cout << "ID: " << current->id << " - " << current->task << " - Days Left: " << current->daysLeft << "\n";
+            current = current->next;
+        }
+    }
+
+   
+    ~TaskManager() {
+        while (front) {
+            Task* temp = front;
+            front = front->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TaskManager manager;
+    int choice, id, daysLeft;
+    string name;
+
+    while (true) {
+        cout << "\nTask Manager - Queue Operations\n";
+        cout << "1. Enqueue Task\n2. Dequeue Task\n3. Peek Task\n4. Search Task\n5. Display Tasks\n6. Exit\nEnter choice: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            cout << "Enter Task ID: "; cin >> id;
+            cout << "Enter Task Name: "; cin.ignore(); getline(cin, name);
+            cout << "Enter Days Left: "; cin >> daysLeft;
+            manager.enqueue(id, name, daysLeft);
+            break;
+        case 2:
+            manager.dequeue();
+            break;
+        case 3:
+            manager.peek();
+            break;
+        case 4:
+            cout << "Enter Task ID to Search: "; cin >> id;
+            manager.search(id);
+            break;
+        case 5:
+            manager.display();
+            break;
+        case 6:
+            cout << "Exiting Task Manager.\n";
+            return 0;
+        default:
+            cout << "Invalid choice. Try again.\n";
+        }
+    }
+}
