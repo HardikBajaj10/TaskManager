@@ -1,0 +1,205 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Task {
+public:
+    int id;
+    string task;
+    int daysLeft;
+    Task* next;
+    Task* prev;
+
+    Task(int taskId, string taskName, int days) {
+        id=taskId;
+        task=taskName;
+        daysLeft=days;
+        next=nullptr;
+        prev=nullptr;
+    }
+};
+
+class TaskManager {
+private:
+    Task* head;
+    Task* tail;
+
+public:
+    TaskManager() {
+        head=nullptr;
+        tail=nullptr;
+    }
+
+    void insertTask(int id, const string& name, int daysLeft, int position = -1) {
+        Task* newTask = new Task(id, name, daysLeft);
+        if (!newTask) {
+            cout << "Memory allocation failed.\n";
+            return;
+        }
+
+        if (!head || position == 0) { // head
+            newTask->next = head;
+            if (head) head->prev = newTask;
+            head = newTask;
+            if (!tail) tail = newTask;
+        } else if (position == -1) { // tail
+            tail->next = newTask;
+            newTask->prev = tail;
+            tail = newTask;
+        } else { // specific position
+            Task* current = head;
+            int index = 0;
+            while (current->next && index < position - 1) {
+                current = current->next;
+                index++;
+            }
+            newTask->next = current->next;
+            newTask->prev = current;
+            if (current->next) current->next->prev = newTask;
+            current->next = newTask;
+            if (!newTask->next) tail = newTask;
+        }
+        cout << "Task added successfully.\n";
+    }
+
+    void deleteTask(int position = -1) {
+        if (!head) {
+            cout << "No tasks available to delete.\n";
+            return;
+        }
+
+        Task* temp = nullptr;
+        if (position == 0 || head == tail) { // Delete from head
+            temp = head;
+            head = head->next;
+            if (head) head->prev = nullptr;
+            if (temp == tail) tail = nullptr;
+        } else if (position == -1) { // Delete from tail
+            temp = tail;
+            tail = tail->prev;
+            if (tail) tail->next = nullptr;
+        } else { // Delete at specific position
+            Task* current = head;
+            int index = 0;
+            while (current->next && index < position) {
+                current = current->next;
+                index++;
+            }
+            temp = current;
+            current->prev->next = current->next;
+            if (current->next) current->next->prev = current->prev;
+            if (current == tail) tail = current->prev;
+        }
+        cout << "Task deleted: " << temp->task << "\n";
+        delete temp;
+    }
+
+    bool searchTaskById(int id) {
+        Task* current = head;
+        while (current) {
+            if (current->id == id) {
+                cout << "Task found: " << current->task << "\n";
+                return true;
+            }
+            current = current->next;
+        }
+        cout << "Task with ID " << id << " not found.\n";
+        return false;
+    }
+
+    bool searchTaskByName(const string& name) {
+        Task* current = head;
+        while (current) {
+            if (current->task == name) {
+                cout << "Task found: ID " << current->id << "\n";
+                return true;
+            }
+            current = current->next;
+        }
+        cout << "Task not found.\n";
+        return false;
+    }
+
+    int countTasks() {
+        int count = 0;
+        Task* current = head;
+        while (current) {
+            count++;
+            current = current->next;
+        }
+        cout << "Total tasks: " << count << "\n";
+        return count;
+    }
+
+    void displayTasksForward() {
+        Task* current = head;
+        cout << "Tasks (Forward Traversal):\n";
+        while (current) {
+            cout << "ID: " << current->id << " - " << current->task << " - Days Left: " << current->daysLeft << "\n";
+            current = current->next;
+        }
+    }
+
+    void displayTasksReverse() {
+        Task* current = tail;
+        cout << "Tasks (Reverse Traversal):\n";
+        while (current) {
+            cout << "ID: " << current->id << " - " << current->task << " - Days Left: " << current->daysLeft << "\n";
+            current = current->prev;
+        }
+    }
+
+    ~TaskManager() {
+        while (head) {
+            Task* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TaskManager manager;
+    int choice, id, daysLeft, position;
+    string name;
+
+    while (true) {
+        cout << "\nTask Manager Menu\n1. Add Task\n2. Delete Task\n3. Search Task by ID\n4. Search Task by Name\n5. Count Tasks\n6. Display Tasks (Forward)\n7. Display Tasks (Reverse)\n8. Exit\nEnter choice: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            cout << "Enter Task ID: "; cin >> id;
+            cout << "Enter Task Name: "; cin.ignore(); getline(cin, name);
+            cout << "Enter Days Left: "; cin >> daysLeft;
+            cout << "Enter Position (0=head, -1=tail, specific position): "; cin >> position;
+            manager.insertTask(id, name, daysLeft, position);
+            break;
+        case 2:
+            cout << "Enter Position to Delete (0=head, -1=tail, specific position): "; cin >> position;
+            manager.deleteTask(position);
+            break;
+        case 3:
+            cout << "Enter Task ID to Search: "; cin >> id;
+            manager.searchTaskById(id);
+            break;
+        case 4:
+            cout << "Enter Task Name to Search: "; cin.ignore(); getline(cin, name);
+            manager.searchTaskByName(name);
+            break;
+        case 5:
+            manager.countTasks();
+            break;
+        case 6:
+            manager.displayTasksForward();
+            break;
+        case 7:
+            manager.displayTasksReverse();
+            break;
+        case 8:
+            cout << "Exiting Task Manager.\n";
+            return 0;
+        default:
+            cout << "Invalid choice. Try again.\n";
+        }
+    }
+}

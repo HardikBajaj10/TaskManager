@@ -1,0 +1,209 @@
+#include <iostream>
+
+using namespace std;
+
+// Task structure (Node for Linked List)
+struct Task {
+    int id;
+    string title;
+    string description;
+    Task* next;
+};
+
+// Iterative Task Manager (Using Linked List)
+class TaskManagerIterative {
+private:
+    Task* head;
+    int taskIdCounter;
+
+public:
+    TaskManagerIterative() {
+        head = nullptr;
+        taskIdCounter = 1;
+        addPredefinedTasks(); // Automatically add predefined tasks
+    }
+
+    void addTaskIterative(string title, string description) {
+        Task* newTask = new Task{taskIdCounter++, title, description, nullptr};
+        if (!head) {
+            head = newTask;
+        } else {
+            Task* temp = head;
+            while (temp->next) {
+                temp = temp->next;
+            }
+            temp->next = newTask;
+        }
+        cout << "Task added successfully!\n";
+    }
+
+    void displayTasksIterative() {
+        if (!head) {
+            cout << "No tasks available.\n";
+            return;
+        }
+        Task* temp = head;
+        cout << "Task List:\n";
+        while (temp) {
+            cout << "ID: " << temp->id << " | Title: " << temp->title << " | Description: " << temp->description << endl;
+            temp = temp->next;
+        }
+    }
+
+    void removeTaskIterative(int id) {
+        if (!head) {
+            cout << "No tasks available to remove.\n";
+            return;
+        }
+        if (head->id == id) {
+            Task* temp = head;
+            head = head->next;
+            delete temp;
+            cout << "Task removed successfully!\n";
+            return;
+        }
+        Task* temp = head;
+        while (temp->next && temp->next->id != id) {
+            temp = temp->next;
+        }
+        if (temp->next) {
+            Task* toDelete = temp->next;
+            temp->next = temp->next->next;
+            delete toDelete;
+            cout << "Task removed successfully!\n";
+        } else {
+            cout << "Task not found!\n";
+        }
+    }
+
+    void addPredefinedTasks() {
+        addTaskIterative("Fix UI Bug", "Resolve the alignment issue on the dashboard.");
+        addTaskIterative("Database Backup", "Backup the MySQL database before deployment.");
+        addTaskIterative("Implement API", "Develop the task synchronization API.");
+    }
+};
+
+// Recursive Task Manager
+class TaskManagerRecursive {
+private:
+    Task* head;
+    int taskIdCounter;
+
+public:
+    TaskManagerRecursive() {
+        head = nullptr;
+        taskIdCounter = 1;
+        addPredefinedTasks(); // Automatically add predefined tasks
+    }
+
+    void addTaskRecursiveHelper(Task*& node, string title, string description) {
+        if (!node) {
+            node = new Task{taskIdCounter++, title, description, nullptr};
+            cout << "Task added successfully!\n";
+            return;
+        }
+        addTaskRecursiveHelper(node->next, title, description);
+    }
+
+    void addTaskRecursive(string title, string description) {
+        addTaskRecursiveHelper(head, title, description);
+    }
+
+    void displayTasksRecursiveHelper(Task* node) {
+        if (!node) return;
+        cout << "ID: " << node->id << " | Title: " << node->title << " | Description: " << node->description << endl;
+        displayTasksRecursiveHelper(node->next);
+    }
+
+    void displayTasksRecursive() {
+        if (!head) {
+            cout << "No tasks available.\n";
+            return;
+        }
+        cout << "Task List:\n";
+        displayTasksRecursiveHelper(head);
+    }
+
+    Task* removeTaskRecursiveHelper(Task* node, int id) {
+        if (!node) return nullptr;
+        if (node->id == id) {
+            Task* temp = node->next;
+            delete node;
+            cout << "Task removed successfully!\n";
+            return temp;
+        }
+        node->next = removeTaskRecursiveHelper(node->next, id);
+        return node;
+    }
+
+    void removeTaskRecursive(int id) {
+        head = removeTaskRecursiveHelper(head, id);
+    }
+
+    void addPredefinedTasks() {
+        addTaskRecursive("Update Documentation", "Review and update API documentation.");
+        addTaskRecursive("Code Refactoring", "Optimize existing code for better performance.");
+        addTaskRecursive("Test Automation", "Write test cases for user authentication.");
+    }
+};
+
+// Driver Code
+int main() {
+    TaskManagerIterative iterative;
+    TaskManagerRecursive recursive;
+    int choice, id;
+    string title, description;
+
+    while (true) {
+        cout << "\nTask Manager\n";
+        cout << "1. Add Task (Iterative)\n";
+        cout << "2. Display Tasks (Iterative)\n";
+        cout << "3. Remove Task (Iterative)\n";
+        cout << "4. Add Task (Recursive)\n";
+        cout << "5. Display Tasks (Recursive)\n";
+        cout << "6. Remove Task (Recursive)\n";
+        cout << "7. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter title: ";
+                cin.ignore();
+                getline(cin, title);
+                cout << "Enter description: ";
+                getline(cin, description);
+                iterative.addTaskIterative(title, description);
+                break;
+            case 2:
+                iterative.displayTasksIterative();
+                break;
+            case 3:
+                cout << "Enter Task ID to remove: ";
+                cin >> id;
+                iterative.removeTaskIterative(id);
+                break;
+            case 4:
+                cout << "Enter title: ";
+                cin.ignore();
+                getline(cin, title);
+                cout << "Enter description: ";
+                getline(cin, description);
+                recursive.addTaskRecursive(title, description);
+                break;
+            case 5:
+                recursive.displayTasksRecursive();
+                break;
+            case 6:
+                cout << "Enter Task ID to remove: ";
+                cin >> id;
+                recursive.removeTaskRecursive(id);
+                break;
+            case 7:
+                cout << "Exiting...\n";
+                return 0;
+            default:
+                cout << "Invalid choice. Try again.\n";
+        }
+    }
+}
