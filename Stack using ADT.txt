@@ -1,0 +1,130 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Task {
+public:
+    int id;
+    string task;
+    int daysLeft;
+    Task* next;
+
+    Task(int taskId, string taskName, int days) {
+        id=taskId;
+        task=taskName;
+        daysLeft=days;
+        next=nullptr;
+    }
+};
+
+class TaskManager {
+private:
+    Task* top;
+
+public:
+    TaskManager() {
+        top=nullptr;
+    }
+
+    void push(int id, const string& name, int daysLeft) {
+        Task* newTask = new Task(id, name, daysLeft);
+        if (!newTask) {
+            cout << "Memory allocation failed.\n";
+            return;
+        }
+        newTask->next = top;
+        top = newTask;
+        cout << "Task pushed successfully.\n";
+    }
+
+    void pop() {
+        if (!top) {
+            cout << "Stack underflow! No tasks to pop.\n";
+            return;
+        }
+        Task* temp = top;
+        top = top->next;
+        cout << "Popped task: " << temp->task << "\n";
+        delete temp;
+    }
+
+    void peek() {
+        if (!top) {
+            cout << "Stack is empty!\n";
+            return;
+        }
+        cout << "Top task: " << top->task << " (ID: " << top->id << ", Days Left: " << top->daysLeft << ")\n";
+    }
+
+    bool search(int id) {
+        Task* current = top;
+        while (current) {
+            if (current->id == id) {
+                cout << "Task found: " << current->task << "\n";
+                return true;
+            }
+            current = current->next;
+        }
+        cout << "Task with ID " << id << " not found.\n";
+        return false;
+    }
+
+    void display() {
+        if (!top) {
+            cout << "Stack is empty!\n";
+            return;
+        }
+        cout << "Task Stack:\n";
+        Task* current = top;
+        while (current) {
+            cout << "ID: " << current->id << " - " << current->task << " - Days Left: " << current->daysLeft << "\n";
+            current = current->next;
+        }
+    }
+
+    ~TaskManager() {
+        while (top) {
+            Task* temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TaskManager manager;
+    int choice, id, daysLeft;
+    string name;
+
+    while (true) {
+        cout << "\nTask Manager - Stack Operations\n";
+        cout << "1. Push Task\n2. Pop Task\n3. Peek Task\n4. Search Task\n5. Display Tasks\n6. Exit\nEnter choice: ";
+        cin >> choice;
+        switch (choice) {
+        case 1:
+            cout << "Enter Task ID: "; cin >> id;
+            cout << "Enter Task Name: "; cin.ignore(); getline(cin, name);
+            cout << "Enter Days Left: "; cin >> daysLeft;
+            manager.push(id, name, daysLeft);
+            break;
+        case 2:
+            manager.pop();
+            break;
+        case 3:
+            manager.peek();
+            break;
+        case 4:
+            cout << "Enter Task ID to Search: "; cin >> id;
+            manager.search(id);
+            break;
+        case 5:
+            manager.display();
+            break;
+        case 6:
+            cout << "Exiting Task Manager.\n";
+            return 0;
+        default:
+            cout << "Invalid choice. Try again.\n";
+        }
+    }
+}

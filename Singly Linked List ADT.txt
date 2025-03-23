@@ -1,0 +1,194 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Task {
+    int id;
+    string task;
+    int daysLeft; 
+    Task* next;
+};
+
+class TaskManager {
+private:
+    Task* head;
+
+public:
+    TaskManager() {
+        head=nullptr;
+    }
+    void insertTask(int id, const string& name, int daysLeft, int position = -1) {
+        Task* newTask = new Task{id, name, daysLeft, nullptr};
+        if (!newTask) {
+            cout << "Memory allocation failed.\n";
+            return;
+        }
+        if (position == 0 || head == nullptr) { // Insert at head
+            newTask->next = head;
+            head = newTask;
+        } else {
+            Task* current = head;
+            int index = 0;
+
+            while (current->next != nullptr && index < position - 1) {
+                current = current->next;
+                index++;
+            }
+
+            newTask->next = current->next;
+            current->next = newTask;
+        }
+
+        cout << "Task \"" << name << "\" with ID " << id << " added successfully.\n";
+    }
+    void deleteTask(int position = -1) {
+        if (!head) {
+            cout << "No tasks available to delete.\n";
+            return;
+        }
+
+        Task* temp = nullptr;
+
+        if (position == 0 || head->next == nullptr) { 
+            temp = head;
+            head = head->next;
+        } else {
+            Task* current = head;
+            int index = 0;
+
+            while (current->next != nullptr && index < position - 1) {
+                current = current->next;
+                index++;
+            }
+
+            temp = current->next;
+            if (temp != nullptr) {
+                current->next = temp->next;
+            } else {
+                cout << "Invalid position.\n";
+                return;
+            }
+        }
+
+        cout << "Task \"" << temp->task << "\" with ID " << temp->id << " deleted successfully.\n";
+        delete temp;
+    }
+    bool searchTask(int id) {
+        Task* current = head;
+
+        while (current != nullptr) {
+            if (current->id == id) {
+                cout << "Task found: \n";
+                cout << "ID: " << current->id << ", Name: " << current->task << ", Days Left: " << current->daysLeft << "\n";
+                return true;
+            }
+            current = current->next;
+        }
+
+        cout << "Task with ID " << id << " not found.\n";
+        return false;
+    }
+
+    int countTasks() {
+        Task* current = head;
+        int count = 0;
+
+        while (current != nullptr) {
+            count++;
+            current = current->next;
+        }
+
+        cout << "Total tasks: " << count << "\n";
+        return count;
+    }
+    void displayUpcomingTasks() {
+        if (!head) {
+            cout << "No tasks available.\n";
+            return;
+        }
+        Task* current = head;
+        cout << "\nUpcoming Tasks (Sorted by Days Left):\n";
+        cout << "ID | Name           | Days Left\n";
+        cout << "-------------------------------\n";
+
+        while (current != nullptr) {
+            cout << current->id << "  | " << current->task << "  | " << current->daysLeft << "\n";
+            current = current->next;
+        }
+    }
+    ~TaskManager() {
+        while (head != nullptr) {
+            Task* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    TaskManager manager;
+
+    // Predefined tasks
+    manager.insertTask(1,"Meeting with Manger", 10, -1);
+    manager.insertTask(2, "Friends Birthday", 3, -1);
+    manager.insertTask(3, "Take dog to the vet", 7, -1);
+    manager.insertTask(4, "Get groceries for the new month", 2, -1);
+    manager.insertTask(5, "Get Health Check-up", 5, -1);
+
+    int choice, id, daysLeft, position;
+    string name;
+
+    while (true) {
+        cout << "\nTask Manager - Menu\n";
+        cout << "1. Add Task\n";
+        cout << "2. Delete Task\n";
+        cout << "3. Search Task\n";
+        cout << "4. Count Tasks\n";
+        cout << "5. Display Upcoming Tasks\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter Task ID: ";
+            cin >> id;
+            cout << "Enter Task Name: ";
+            cin.ignore();
+            getline(cin, name);
+            cout << "Enter Days Left: ";
+            cin >> daysLeft;
+            cout << "Enter Position (0 for head, -1 for tail, or specific position): ";
+            cin >> position;
+            manager.insertTask(id, name, daysLeft, position);
+            break;
+
+        case 2:
+            cout << "Enter Position to Delete (0 for head, -1 for tail, or specific position): ";
+            cin >> position;
+            manager.deleteTask(position);
+            break;
+
+        case 3:
+            cout << "Enter Task ID to Search: ";
+            cin >> id;
+            manager.searchTask(id);
+            break;
+
+        case 4:
+            manager.countTasks();
+            break;
+
+        case 5:
+            manager.displayUpcomingTasks();
+            break;
+
+        case 6:
+            cout << "Exiting Task Manager.\n";
+            return 0;
+
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    }
+}
